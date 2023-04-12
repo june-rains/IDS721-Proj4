@@ -7,10 +7,6 @@ This is my study for AWS DynamoDB, SQS, S3, AWS Lambda, AWS Comprehend to build 
 
 ## Set Up
 
-
-
-# Setup and Deployment
-
 To build this serverless architecture on AWS from scratch, follow these steps:
 
 Step 1: Create DynamoDB table, SQS queue, S3 bucket & working environment
