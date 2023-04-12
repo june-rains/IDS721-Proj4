@@ -9,7 +9,7 @@ This is my study for AWS DynamoDB, SQS, S3, AWS Lambda, AWS Comprehend to build 
 
 To build this serverless architecture on AWS from scratch, follow these steps:
 
-Step 1: Create DynamoDB table, SQS queue, S3 bucket & working environment
+**Step 1: Create DynamoDB table, SQS queue, S3 bucket & working environment**
 
 * Open AWS DynamoDB console and create a table called "fang". For the primary key, use "name" with type "string".
 
@@ -21,7 +21,7 @@ Step 1: Create DynamoDB table, SQS queue, S3 bucket & working environment
 
 * Open AWS Cloud9 console, open the IDE of your working environment, create a new directory for this project, and cd into it.
 
-Step 2: Create producer-side Lambda function (triggered by a CloudWatch timer)
+**Step 2: Create producer-side Lambda function (triggered by a CloudWatch timer)**
 
 This function reads data from the DynamoDB table and puts messages into the SQS queue.
 
@@ -52,7 +52,7 @@ sam build --use-container
 sam deploy --guided
 ```
 
-Step3: Add Permission
+**Step 3: Add Permission**
 
 * Access the AWS Lambda console and locate the new app "sam-app" and a new Lambda function named "sam-app-HelloWorldFunction-xxxx". Click on the function, then navigate to "Configuration" > "Permission", and click on the existing role to be directed to the IAM console.
 
@@ -62,50 +62,45 @@ Step3: Add Permission
 
 * Add a new EventBridge (CloudWatch Events) trigger. For its configuration, create a new rule and name it "OneMinuteTimer" (or any desired name). For the "schedule expression", input "rate(1 minute)".
 
-Step 4: Test
+**Step 4: Test lambda-producer**
 
-You can now enable the trigger and view the messages in the SQS queue.
+* You can now enable the trigger and view the messages in the SQS queue.
 
-In the AWS SQS console, click on the "readDBValue" queue, followed by "Send and receive messages", and then "poll for messages".
+* In the AWS SQS console, click on the "readDB" queue, followed by "Send and receive messages", and then "poll for messages".
 
-In the AWS Lambda console, on the specific function page, click on "Monitor" to find more details about the activity. You can also select "View Logs in CloudWatch".
+* In the AWS Lambda console, on the specific function page, click on "Monitor" to find more details about the activity. You can also select "View Logs in CloudWatch".
 
 You have the option to disable the trigger and purge the SQS queue at any time.
 
 
-# Consumer Lambda Function
-Create a second Lambda function that reads messages from the SQS queue and extracts the company name. It then generates Wikipedia snippets of the name and uses the AWS Comprehend API to conduct sentiment detection, key phrase detection, and entity detection on the snippets. The analysis results are then written to S3. This function is triggered by SQS.
+**Step 5: Create a second SAM application named "lambda-consumer" like the previous one**
 
-## Create SAM Application
+* Replace "app.py" with the file lambda-consumer/hello_world/app.py from this repo.
 
-Create a second SAM application named "lambda-consumer" like the previous one.
-
-Replace "app.py" with the file lambda-consumer/hello_world/app.py from this repo.
-
-Modify app.py to update the REGION and bucket name.  
+* Modify app.py to update the REGION and bucket name.  
 **ATTENTION: you need select REGION as us-east-1, otherwise, the AWS Comprehend will not be supported in other area like us-west-1**
 
-Replace "requirements.txt" with the file lambda-checkSQS/hello_world/requirements.txt from this repo.
+* Replace "requirements.txt" with the file lambda-checkSQS/hello_world/requirements.txt from this repo.
 
-## Build and Deploy
+**Step 6: Build and Deploy**
 
-Run sam build --use-container.
-Run sam deploy --guided.
+* Run sam build --use-container.
+* Run sam deploy --guided.
 
-## Add Permission & Trigger
+**Step 7: Add Permission & Trigger to lambda-consumer function**
 
-Add permission and remove the "API Gateway" trigger as done previously.
+* Add permission and remove the "API Gateway" trigger as done previously.
 
-Add a new SQS trigger with your queue selected and a batch_size of 1.
+* Add a new SQS trigger with your queue selected and a batch_size of 1.
 
-Modify Lambda Function Timeout. 
+* Modify Lambda Function Timeout. 
 
 To successfully write results to S3, modify the timeout for the second Lambda function:
 
 * Open the second Lambda function's page, click on "Configuration", and then click on "General configuration".
 * Set the timeout to 1 minute.
 
-# Test
+**Step 8: Test Overall Pipeline**
 
 You can now activate both triggers for the two functions and view the output in the S3 bucket, where you will find a csv file with the sentiment analysis output
 
